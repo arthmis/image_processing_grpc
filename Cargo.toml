@@ -1,0 +1,27 @@
+[package]
+name = "image_processing_grpc_server"
+version = "0.1.0"
+authors = ["arthmis arthmis20@gmail.com"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "client"
+path = "src/client.rs"
+
+[[bin]]
+name = "server"
+path = "src/server.rs"
+
+[dependencies]
+tonic = "0.1.1"
+prost = "0.6"
+futures-core = "0.3"
+futures-util = "0.3"
+tokio = { version = "0.2", features = ["macros", "sync", "stream", "time"] }
+async-stream = "0.2"
+serde = { version = "1.0", features = ["derive"] }
+
+[build-dependencies]
+tonic-build = "0.1.1"
