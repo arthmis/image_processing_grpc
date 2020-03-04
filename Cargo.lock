@@ -341,7 +341,7 @@ dependencies = [
 [[package]]
 name = "image_processing"
 version = "0.1.0"
-source = "git+https://github.com/arthmis/image-processing.git#fcf44b2f596305a92dc57f95d251698bfc25d3a0"
+source = "git+https://github.com/arthmis/image-processing.git#cb1f7df94890efc861cb0b6dd66c35e48f5d3bfd"
 dependencies = [
  "image 0.22.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
