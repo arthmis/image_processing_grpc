@@ -1,14 +1,7 @@
 use image::ColorType;
 
-// pub mod imageprocessing {
-//     tonic::include_proto!("image_processing");
-// }
-
-// use imageprocessing::image_processing_client::ImageProcessingClient;
-// use imageprocessing::{EdgeDetect, Image, ImageType, Invert};
-
 use process_image::imageprocessing::image_processing_client::ImageProcessingClient;
-use process_image::imageprocessing::{EdgeDetect, Image, ImageType, Invert, ResultImage};
+use process_image::imageprocessing::{BoxBlur, EdgeDetect, Image, ImageType, Invert, ResultImage};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -23,19 +16,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         data: image_data.into_vec(),
         // invert: Some(Invert {}),
         invert: None,
-        edge_detect: Some(EdgeDetect { threshold: 120 }),
+        // edge_detect: Some(EdgeDetect { threshold: 80 }),
+        edge_detect: None,
+        box_blur: Some(BoxBlur { kernel_width: 11 }),
     });
 
-    // let response = client.invert(request).await?;
     let response = client.process_image(request).await?;
 
-    // dbg!(&response);
-
     let processed_image = response.into_inner();
-    // dbg!(inverted_image);
 
     image::save_buffer(
-        "./images/invert.png",
+        "./images/processed_image.png",
         &processed_image.data,
         processed_image.width,
         processed_image.height,

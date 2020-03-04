@@ -1,9 +1,5 @@
-// pub mod imageprocessing {
-//     tonic::include_proto!("image_processing");
-// }
-
 pub mod imageprocessing;
-use crate::imageprocessing::{EdgeDetect, Image, ImageType, Invert};
+use crate::imageprocessing::{BoxBlur, EdgeDetect, Invert};
 
 use image::RgbaImage;
 
@@ -28,7 +24,6 @@ impl EdgeDetect {
     fn edge_detect(&self, image: &mut RgbaImage) {
         use image::{ConvertBuffer, GrayImage};
         use image_processing::edge_detection::normal_sobel_mut;
-        use image_processing::edge_detection::sobel_mut;
         use std::mem;
         let mut new_image: GrayImage = image.convert();
 
@@ -40,5 +35,19 @@ impl EdgeDetect {
 impl ProcessImage for EdgeDetect {
     fn process_image(&self, image: &mut RgbaImage) {
         self.edge_detect(image);
+    }
+}
+
+impl BoxBlur {
+    fn box_blur(&self, image: &mut RgbaImage, kernel_size: u32) {
+        use image_processing::blur::{box_filter_mut, MeanKernel};
+
+        box_filter_mut(MeanKernel::new(kernel_size), image);
+    }
+}
+
+impl ProcessImage for BoxBlur {
+    fn process_image(&self, image: &mut RgbaImage) {
+        self.box_blur(image, self.kernel_width);
     }
 }
