@@ -14,6 +14,10 @@ path = "src/client.rs"
 name = "server"
 path = "src/server.rs"
 
+[lib]
+name = "process_image"
+path = "src/lib.rs"
+
 [dependencies]
 tonic = "0.1.1"
 prost = "0.6"
@@ -22,6 +26,8 @@ futures-util = "0.3"
 tokio = { version = "0.2", features = ["macros", "sync", "stream", "time"] }
 async-stream = "0.2"
 serde = { version = "1.0", features = ["derive"] }
+image = "0.22.2"
+image_processing = { git = "https://github.com/arthmis/image-processing"}
 
 [build-dependencies]
 tonic-build = "0.1.1"
