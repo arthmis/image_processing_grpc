@@ -1,0 +1,6 @@
+[hooks]
+pre-commit = "cargo fmt -- --check"
+post-commit = "successfully commited"
+
+[logging]
+verbose = true

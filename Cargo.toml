@@ -31,3 +31,6 @@ image_processing = { git = "https://github.com/arthmis/image-processing"}
 
 [build-dependencies]
 tonic-build = "0.1.1"
+
+[dev-dependencies]
+rusty-hook = "^0.10.3"
