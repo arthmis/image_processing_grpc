@@ -1,14 +1,11 @@
-syntax = "proto3";
+syntax = "proto2";
 package imageprocessing;
 
 message Image {
-    uint32 width = 1;
-    uint32 height = 2;
-    ImageType image_type = 3;
-    bytes data = 4;
-    Invert invert = 5;
-    EdgeDetect edge_detect = 6;
-    BoxBlur box_blur = 7;
+    required uint32 width = 1;
+    required uint32 height = 2;
+    required ImageType image_type = 3;
+    required bytes data = 4;
 }
 
 enum ImageType {
@@ -21,21 +18,29 @@ enum ImageType {
 message Invert {}
 
 message EdgeDetect {
-    uint32 threshold = 1;
+    // must be between 0 and 255
+    required uint32 threshold = 1;
 }
 
 message BoxBlur {
     // must be odd in size
-    uint32 kernel_width = 1;
+    required uint32 kernel_width = 1;
 }
 
-message ResultImage {
-    uint32 width = 1;
-    uint32 height = 2;
-    ImageType image_type = 3;
-    bytes data = 4;
+message ImageParameters {
+    required Image image = 1;
+    optional Invert invert = 2;
+    optional EdgeDetect edge_detect = 3;
+    optional BoxBlur box_blur = 4;
+}
+
+message ThumbnailImage {
+    required uint32 new_width = 1;
+    required uint32 new_height = 2;
+    required Image image = 3;
 }
 
 service ImageProcessing {
-    rpc ProcessImage (Image) returns (ResultImage);
+    rpc ProcessImage (ImageParameters) returns (Image);
+    rpc CreateThumbnail (ThumbnailImage) returns (Image);
 }

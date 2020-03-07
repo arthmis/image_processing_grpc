@@ -8,41 +8,41 @@ use process_image;
 use process_image::imageprocessing::image_processing_server::{
     ImageProcessing, ImageProcessingServer,
 };
-use process_image::imageprocessing::{Image, ImageType, ResultImage};
+use process_image::imageprocessing::{Image, ImageParameters, ImageType, ThumbnailImage};
 use process_image::ProcessImage;
 
 #[tonic::async_trait]
 impl ImageProcessing for ImageProcessingService {
     async fn process_image(
         &self,
-        request: Request<Image>,
-    ) -> Result<Response<ResultImage>, Status> {
+        request: Request<ImageParameters>,
+    ) -> Result<Response<Image>, Status> {
         let image_object = request.into_inner();
 
-        if image_object.data.is_empty() {
+        if image_object.image.data.is_empty() {
             return Err(Status::new(
                 Code::InvalidArgument,
                 "Data variable is empty.",
             ));
         }
+        let image_width = image_object.image.width;
+        let image_height = image_object.image.height;
 
-        let channel_count: u32 = match ImageType::try_from(image_object.image_type)? {
+        let channel_count: u32 = match ImageType::try_from(image_object.image.image_type)? {
             ImageType::Rgba => 4,
             ImageType::Rgb => 3,
             ImageType::Grayalpha => 2,
             ImageType::Gray => 1,
         };
 
-        if image_object.width * image_object.height * channel_count
-            != image_object.data.len() as u32
-        {
+        if image_width * image_height * channel_count != image_object.image.data.len() as u32 {
             return Err(
                 Status::new(
                 Code::InvalidArgument,
                 format!(
                         "Width, height, or image_type is not appropriate value\nwidth: {}\nheight: {}\nchannel count: {}.\n width * height * channel_count has to be equal to bytes buffer length.", 
-                        image_object.width,
-                        image_object.height,
+                        image_width,
+                        image_height,
                         channel_count
                     )
                 )
@@ -50,8 +50,7 @@ impl ImageProcessing for ImageProcessingService {
         }
 
         let mut user_image: RgbaImage =
-            ImageBuffer::from_vec(image_object.width, image_object.height, image_object.data)
-                .unwrap();
+            ImageBuffer::from_vec(image_width, image_height, image_object.image.data).unwrap();
 
         let operations: Vec<Box<dyn ProcessImage>> = {
             let mut operations = Vec::new();
@@ -60,11 +59,11 @@ impl ImageProcessing for ImageProcessingService {
                 operations.push(Box::new(operation) as Box<dyn ProcessImage>);
             }
 
-            if let Some(operation) = image_object.edge_detect {
+            if let Some(operation) = image_object.box_blur {
                 operations.push(Box::new(operation) as Box<dyn ProcessImage>);
             }
 
-            if let Some(operation) = image_object.box_blur {
+            if let Some(operation) = image_object.edge_detect {
                 operations.push(Box::new(operation) as Box<dyn ProcessImage>);
             }
 
@@ -75,14 +74,63 @@ impl ImageProcessing for ImageProcessingService {
             operation.process_image(&mut user_image)?;
         }
 
-        let processed_image = ResultImage {
-            width: image_object.width,
-            height: image_object.height,
-            image_type: ImageType::Rgba as i32,
+        let processed_image = Image {
+            width: image_width,
+            height: image_height,
+            image_type: image_object.image.image_type,
             data: user_image.into_vec(),
         };
 
         Ok(Response::new(processed_image))
+    }
+
+    async fn create_thumbnail(
+        &self,
+        request: Request<ThumbnailImage>,
+    ) -> Result<Response<Image>, Status> {
+        let image_object = request.into_inner();
+
+        if image_object.image.data.is_empty() {
+            return Err(Status::new(
+                Code::InvalidArgument,
+                "Data variable is empty.",
+            ));
+        }
+        let image_width = image_object.image.width;
+        let image_height = image_object.image.height;
+
+        let channel_count: u32 = match ImageType::try_from(image_object.image.image_type)? {
+            ImageType::Rgba => 4,
+            ImageType::Rgb => 3,
+            ImageType::Grayalpha => 2,
+            ImageType::Gray => 1,
+        };
+
+        if image_width * image_height * channel_count != image_object.image.data.len() as u32 {
+            return Err(
+                Status::new(
+                Code::InvalidArgument,
+                format!(
+                        "Width, height, or image_type is not appropriate value\nwidth: {}\nheight: {}\nchannel count: {}.\n width * height * channel_count has to be equal to bytes buffer length.", 
+                        image_width,
+                        image_height,
+                        channel_count
+                    )
+                )
+            );
+        }
+
+        let mut user_image: RgbaImage =
+            ImageBuffer::from_vec(image_width, image_height, image_object.image.data).unwrap();
+
+        let thumbnail = Image {
+            width: image_width,
+            height: image_height,
+            image_type: image_object.image.image_type,
+            data: vec![0; 10],
+        };
+
+        Ok(Response::new(thumbnail))
     }
 }
 
