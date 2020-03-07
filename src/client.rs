@@ -12,13 +12,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         width: image_data.width(),
         height: image_data.height(),
         image_type: ImageType::Rgba as i32,
-        // data: vec![25, 99, 250, 255],
         data: image_data.into_vec(),
-        // invert: Some(Invert {}),
         invert: None,
-        // edge_detect: Some(EdgeDetect { threshold: 80 }),
-        edge_detect: None,
-        box_blur: Some(BoxBlur { kernel_width: 11 }),
+        edge_detect: Some(EdgeDetect { threshold: 150 }),
+        box_blur: Some(BoxBlur { kernel_width: 3 }),
     });
 
     let response = client.process_image(request).await?;
