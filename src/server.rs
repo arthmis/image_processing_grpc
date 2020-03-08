@@ -1,3 +1,4 @@
+use image::imageops::thumbnail;
 use image::{ImageBuffer, RgbaImage};
 use std::convert::TryFrom;
 use tonic::{transport::Server, Code, Request, Response, Status};
@@ -96,8 +97,18 @@ impl ImageProcessing for ImageProcessingService {
                 "Data variable is empty.",
             ));
         }
+
         let image_width = image_object.image.width;
         let image_height = image_object.image.height;
+        let new_height = image_object.new_height;
+        let new_width = image_object.new_width;
+
+        if new_width > image_width || new_height > image_height {
+            return Err(Status::new(
+                Code::InvalidArgument,
+                "new width or height shouldn't be greater than the image width or height.",
+            ));
+        }
 
         let channel_count: u32 = match ImageType::try_from(image_object.image.image_type)? {
             ImageType::Rgba => 4,
@@ -120,14 +131,14 @@ impl ImageProcessing for ImageProcessingService {
             );
         }
 
-        let mut user_image: RgbaImage =
+        let user_image: RgbaImage =
             ImageBuffer::from_vec(image_width, image_height, image_object.image.data).unwrap();
 
         let thumbnail = Image {
-            width: image_width,
-            height: image_height,
+            width: new_width,
+            height: new_height,
             image_type: image_object.image.image_type,
-            data: vec![0; 10],
+            data: thumbnail(&user_image, new_width, new_height).into_vec(),
         };
 
         Ok(Response::new(thumbnail))
