@@ -1,6 +1,6 @@
 [hooks]
-pre-commit = "cargo fmt -- --check"
-post-commit = "successfully commited"
+pre-commit = "cargo fmt -- --check && cargo check && cargo test"
+post-commit = "successfully committed"
 
 [logging]
 verbose = true

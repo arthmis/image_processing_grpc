@@ -49,12 +49,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let thumbnail = response.into_inner();
 
-    println!(
-        "{} {} {}",
-        thumbnail.data.len(),
-        thumbnail.width,
-        thumbnail.height
-    );
     image::save_buffer(
         "./images/processed_image.png",
         &thumbnail.data,
